@@ -11,3 +11,6 @@ spring:
       names: ${job.names=NONE}
     jdbc:
       initialize-schema: always
+
+logging:
+  config: classpath:log4j2.yml
