@@ -52,6 +52,7 @@ public class ValidatedParamJobConfig {
     private CompositeJobParametersValidator multiVaildator(){
         CompositeJobParametersValidator validator = new CompositeJobParametersValidator();
         validator.setValidators(Arrays.asList(new FileParamValiator()));
+        return validator;
     }
 
     @JobScope
