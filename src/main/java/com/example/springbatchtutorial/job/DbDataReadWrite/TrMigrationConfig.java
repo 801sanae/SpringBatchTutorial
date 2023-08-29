@@ -93,9 +93,7 @@ public class TrMigrationConfig {
 //                return null;
 //            }
 //        }
-        return (item) ->{
-            return new Accounts(item);
-        };
+        return (item) -> new Accounts(item);
     }
 
     @StepScope
