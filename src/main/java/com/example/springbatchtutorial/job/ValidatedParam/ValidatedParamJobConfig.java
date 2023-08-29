@@ -1,19 +1,23 @@
-package com.example.springbatchtutorial.job;
+package com.example.springbatchtutorial.job.ValidatedParam;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
+import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
  * packageName    : com.example.springbatchtutorial.job
- * fileName       : HelloWorldJobConfig
+ * fileName       : ValidatedParamJobConfig
  * author         : kmy
  * date           : 2023/08/29
  * description    :
@@ -24,26 +28,34 @@ import org.springframework.context.annotation.Configuration;
  */
 @Slf4j
 @Configuration
-public class HelloWorldJobConfig {
+public class ValidatedParamJobConfig {
     @Autowired
     private JobBuilderFactory jobBuilderFactory;
     @Autowired
     private StepBuilderFactory stepBuilderFactory;
-//--spring.batch.job.names=HelloWorldJob
+//--spring.batch.job.names=ValidatedParamJob
     @Bean
-    public Job HelloWorldJob(){
-        return jobBuilderFactory.get("HelloWorldJob")
+    public Job validatedParamJob(Step validatedParamStep1){
+        return jobBuilderFactory.get("ValidatedParamJob")
                 .incrementer(new RunIdIncrementer())
-                .start(Step1())
+                .start(validatedParamStep1)
                 .build();
     }
 
+    @JobScope
     @Bean
-    public Step Step1(){
-        return stepBuilderFactory.get("HelloWorldStep")
-                .tasklet((stepContribution,chunkContext)->{
-                    log.info("Hello World Batch!");
-                  return RepeatStatus.FINISHED;
-                }).build();
+    public Step validatedParamStep1(Tasklet validatedParamTasklet){
+        return stepBuilderFactory.get("ValidatedParamStep")
+                .tasklet(validatedParamTasklet)
+                .build();
+    }
+    //--spring.batch.job.names=ValidatedParamJob -fileName=test.csv
+    @StepScope
+    @Bean
+    public Tasklet validatedParamTasklet(@Value("#{jobParameters['fileName']}") String fileName){
+        return (a,b) -> {
+            log.debug("validated Param Tasklet call!! paramter {}", fileName);
+          return RepeatStatus.FINISHED;
+        };
     }
 }
