@@ -1,5 +1,6 @@
 package com.example.springbatchtutorial.job.DbDataReadWrite;
 
+import com.example.springbatchtutorial.domain.Accounts;
 import com.example.springbatchtutorial.domain.Orders;
 import com.example.springbatchtutorial.repository.AccountsRepository;
 import com.example.springbatchtutorial.repository.OrdersRepository;
@@ -12,9 +13,12 @@ import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
+import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.data.RepositoryItemReader;
 import org.springframework.batch.item.data.builder.RepositoryItemReaderBuilder;
+import org.springframework.batch.item.data.builder.RepositoryItemWriterBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -55,13 +59,15 @@ public class TrMigrationConfig {
 
     @JobScope
     @Bean
-    public Step trMigrationStep(ItemReader trOrdersReader){
+    public Step trMigrationStep(ItemReader trOrdersReader, ItemProcessor trOrderProcessor, ItemWriter trOrderWriter){
         return stepBuilderFactory.get("trMigrationStep")
-                .<Orders,Orders>chunk(5) // <src,trg> commit 단위 5
+                .<Orders, Accounts>chunk(5) // <src,trg> commit 단위 5
                 .reader(trOrdersReader)
-                .writer((items)->{
-                    items.forEach(System.out::println);
-                })
+                .processor(trOrderProcessor)
+                .writer(trOrderWriter)
+                //                .writer((items)->{
+//                    items.forEach(System.out::println);
+//                })
                 .build();
     }
 
@@ -77,5 +83,36 @@ public class TrMigrationConfig {
                 .sorts(Collections.singletonMap("id", Sort.Direction.ASC))
                 .build();
     }
+
+    @StepScope
+    @Bean
+    public ItemProcessor<Orders, Accounts> trOrderProcessor(){
+//        return new ItemProcessor<Orders, Accounts>() {
+//            @Override
+//            public Accounts process(Orders item) throws Exception {
+//                return null;
+//            }
+//        }
+        return (item) ->{
+            return new Accounts(item);
+        };
+    }
+
+    @StepScope
+    @Bean
+    public ItemWriter<Accounts> trOrderWriter(){
+        // #1 RepositoryItemWriterBuilder를 사용하여 적재가능.
+//        return new RepositoryItemWriterBuilder<Accounts>()
+//                .repository(accountsRepository)
+//                .methodName("save")
+//                .build();
+        // #2 ItemWriter<Accounts>를 사용하여 직접 지정하여 적재가능.
+        return (items)->{
+            items.forEach( item -> accountsRepository.save(item) );
+        };
+    }
+
+
+
 
 }

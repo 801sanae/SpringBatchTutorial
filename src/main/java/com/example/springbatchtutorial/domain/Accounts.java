@@ -1,6 +1,7 @@
 package com.example.springbatchtutorial.domain;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.Entity;
@@ -20,6 +21,8 @@ import java.util.Date;
  * -----------------------------------------------------------
  * 2023/08/29        kmy       최초 생성
  */
+
+@NoArgsConstructor
 @Entity
 @Getter
 @Setter
@@ -32,4 +35,12 @@ public class Accounts {
     private Date orderDate;
 
     private Date accountDate;
+
+    public Accounts(Orders orders){
+        this.id = orders.getId();
+        this.orderItem = orders.getOrderItem();
+        this.price = orders.getPrice();
+        this.orderDate = orders.getOrderDate();
+        this.accountDate = new Date();
+    }
 }
