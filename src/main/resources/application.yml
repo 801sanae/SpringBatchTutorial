@@ -20,6 +20,7 @@ spring:
   batch:
     job:
       names: ${job.names=NONE}
+#      enabled: false # 스케쥴링에 의한 Job 실행 파라미터가 존재하더라도 실행되지 않음.
     jdbc:
       initialize-schema: always
 
