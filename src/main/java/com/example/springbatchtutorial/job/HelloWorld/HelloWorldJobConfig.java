@@ -3,18 +3,20 @@ package com.example.springbatchtutorial.job.HelloWorld;
 import com.example.springbatchtutorial.methodInvoke.InvokMethodTest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.step.tasklet.CallableTaskletAdapter;
 import org.springframework.batch.core.step.tasklet.MethodInvokingTaskletAdapter;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.config.Task;
 
 import java.util.concurrent.Callable;
 
@@ -84,9 +86,10 @@ public class HelloWorldJobConfig {
     }
 
     @Bean
-    public Step methodInvokingStep3(Tasklet methodInvokingTasklet){
+    public Step methodInvokingStep3(Tasklet methodInvokingTasklet1){
         return stepBuilderFactory.get("methodInvokingStep3")
-                .tasklet(methodInvokingTasklet)
+//                .tasklet(methodInvokingTasklet)
+                .tasklet(methodInvokingTasklet1)
                 .build();
     }
 
@@ -99,6 +102,19 @@ public class HelloWorldJobConfig {
 
         methodInvokingTaskletAdapter.setTargetObject(service());
         methodInvokingTaskletAdapter.setTargetMethod("serviceMethod");
+
+        return methodInvokingTaskletAdapter;
+    }
+
+
+    @StepScope
+    @Bean
+    public MethodInvokingTaskletAdapter methodInvokingTasklet1(@Value("#{jobParameters['msg']}") String msg){
+        MethodInvokingTaskletAdapter methodInvokingTaskletAdapter = new MethodInvokingTaskletAdapter();
+
+        methodInvokingTaskletAdapter.setTargetObject(service());
+        methodInvokingTaskletAdapter.setTargetMethod("serviceMethod");
+        methodInvokingTaskletAdapter.setArguments(new String[]{msg});
 
         return methodInvokingTaskletAdapter;
     }

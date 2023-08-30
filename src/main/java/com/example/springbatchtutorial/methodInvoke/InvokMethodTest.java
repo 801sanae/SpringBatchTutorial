@@ -20,4 +20,8 @@ public class InvokMethodTest {
         log.error("{}.serviceMethod() is called!!", this.getClass().getName());
     }
 
+    public void serviceMethod(String msg){
+        log.error("{}.serviceMethod() is called!! // msg : {}", this.getClass().getName(), msg);
+    }
+
 }
