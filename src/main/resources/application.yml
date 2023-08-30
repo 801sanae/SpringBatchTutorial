@@ -27,6 +27,6 @@ spring:
 spring:
   profiles:
     active:
-      on-profile:test
+      on-profile: test
   jpa:
     database: h2

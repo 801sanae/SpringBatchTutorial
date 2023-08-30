@@ -1,8 +1,6 @@
 package com.example.springbatchtutorial.domain;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -22,6 +20,8 @@ import java.util.Date;
  * 2023/08/29        kmy       최초 생성
  */
 
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @Getter
 @Setter
