@@ -50,7 +50,7 @@ public class ConditionStepJobConfig {
                 .tasklet(new Tasklet() {
                     @Override
                     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-                        //                        System.out.println("conditional Start Step");
+                        //                        System.out.println("conditional Start StepListener");
                         //                        return RepeatStatus.FINISHED;
                         throw new Exception("Exception!!");
                     }
@@ -65,7 +65,7 @@ public class ConditionStepJobConfig {
                 .tasklet(new Tasklet() {
                     @Override
                     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-                        System.out.println("conditional All Step");
+                        System.out.println("conditional All StepListener");
                         return RepeatStatus.FINISHED;
                     }
                 })
@@ -79,7 +79,7 @@ public class ConditionStepJobConfig {
                 .tasklet(new Tasklet() {
                     @Override
                     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-                        System.out.println("conditional Fail Step");
+                        System.out.println("conditional Fail StepListener");
                         return RepeatStatus.FINISHED;
                     }
                 })
@@ -93,7 +93,7 @@ public class ConditionStepJobConfig {
                 .tasklet(new Tasklet() {
                     @Override
                     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-                        System.out.println("conditional Completed Step");
+                        System.out.println("conditional Completed StepListener");
                         return RepeatStatus.FINISHED;
                     }
                 })

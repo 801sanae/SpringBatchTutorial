@@ -2,6 +2,7 @@ package com.example.springbatchtutorial.job.DbDataReadWrite;
 
 import com.example.springbatchtutorial.domain.Accounts;
 import com.example.springbatchtutorial.domain.Orders;
+import com.example.springbatchtutorial.job.StepListener.ChunkLoggerListener;
 import com.example.springbatchtutorial.repository.AccountsRepository;
 import com.example.springbatchtutorial.repository.OrdersRepository;
 import lombok.RequiredArgsConstructor;
@@ -67,6 +68,7 @@ public class TrMigrationConfig {
                 //                .writer((items)->{
 //                    items.forEach(System.out::println);
 //                })
+                .listener(new ChunkLoggerListener())
                 .build();
     }
 

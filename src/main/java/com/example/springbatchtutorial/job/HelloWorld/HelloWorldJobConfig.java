@@ -1,5 +1,6 @@
 package com.example.springbatchtutorial.job.HelloWorld;
 
+import com.example.springbatchtutorial.job.StepListener.StepLoogerListener;
 import com.example.springbatchtutorial.methodInvoke.InvokMethodTest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
@@ -94,6 +95,7 @@ public class HelloWorldJobConfig {
         return stepBuilderFactory.get("methodInvokingStep3")
 //                .tasklet(methodInvokingTasklet)
                 .tasklet(methodInvokingTasklet1)
+                .listener(new StepLoogerListener())
                 .build();
     }
 
