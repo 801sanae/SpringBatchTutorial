@@ -1,5 +1,6 @@
 package com.example.springbatchtutorial.job.HelloWorld;
 
+import com.example.springbatchtutorial.methodInvoke.InvokMethodTest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -7,6 +8,7 @@ import org.springframework.batch.core.configuration.annotation.JobBuilderFactory
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.step.tasklet.CallableTaskletAdapter;
+import org.springframework.batch.core.step.tasklet.MethodInvokingTaskletAdapter;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,11 +38,12 @@ public class HelloWorldJobConfig {
     private StepBuilderFactory stepBuilderFactory;
 //--spring.batch.job.names=HelloWorldJob
     @Bean
-    public Job HelloWorldJob(Step callableStep2){
+    public Job HelloWorldJob(Step callableStep2, Step methodInvokingStep3){
         return jobBuilderFactory.get("HelloWorldJob")
                 .incrementer(new RunIdIncrementer())
                 .start(Step1())
                 .next(callableStep2)
+                .next(methodInvokingStep3)
                 .build();
     }
 
@@ -78,6 +81,31 @@ public class HelloWorldJobConfig {
         CallableTaskletAdapter callableTaskletAdapter = new CallableTaskletAdapter();
         callableTaskletAdapter.setCallable(callableObject());
         return callableTaskletAdapter;
+    }
+
+    @Bean
+    public Step methodInvokingStep3(Tasklet methodInvokingTasklet){
+        return stepBuilderFactory.get("methodInvokingStep3")
+                .tasklet(methodInvokingTasklet)
+                .build();
+    }
+
+    /*
+        다른 클래스 내의 메서드를 Tasklet에서 실행
+     */
+    @Bean
+    public MethodInvokingTaskletAdapter methodInvokingTasklet(){
+        MethodInvokingTaskletAdapter methodInvokingTaskletAdapter = new MethodInvokingTaskletAdapter();
+
+        methodInvokingTaskletAdapter.setTargetObject(service());
+        methodInvokingTaskletAdapter.setTargetMethod("serviceMethod");
+
+        return methodInvokingTaskletAdapter;
+    }
+
+    @Bean
+    public InvokMethodTest service(){
+        return new InvokMethodTest();
     }
 
 }
