@@ -39,6 +39,7 @@ dependencies {
 
     implementation 'org.springframework.boot:spring-boot-starter-log4j2'
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
+    testRuntimeOnly 'com.h2database:h2'
 
 }
 

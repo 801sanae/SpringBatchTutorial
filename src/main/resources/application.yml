@@ -1,4 +1,15 @@
 spring:
+  profiles:
+    active: loacl
+
+logging:
+  config: classpath:log4j2.yml
+
+---
+spring:
+  config:
+    activate:
+      on-profile: local
   jpa:
     show-sql: true
   datasource:
@@ -12,5 +23,10 @@ spring:
     jdbc:
       initialize-schema: always
 
-logging:
-  config: classpath:log4j2.yml
+---
+spring:
+  profiles:
+    active:
+      on-profile:test
+  jpa:
+    database: h2
