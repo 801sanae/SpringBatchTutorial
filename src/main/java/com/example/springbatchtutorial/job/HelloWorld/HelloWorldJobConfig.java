@@ -9,14 +9,13 @@ import org.springframework.batch.core.configuration.annotation.JobBuilderFactory
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
-import org.springframework.batch.core.step.tasklet.CallableTaskletAdapter;
-import org.springframework.batch.core.step.tasklet.MethodInvokingTaskletAdapter;
-import org.springframework.batch.core.step.tasklet.Tasklet;
+import org.springframework.batch.core.step.tasklet.*;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 
 import java.util.concurrent.Callable;
 
@@ -40,12 +39,17 @@ public class HelloWorldJobConfig {
     private StepBuilderFactory stepBuilderFactory;
 //--spring.batch.job.names=HelloWorldJob
     @Bean
-    public Job HelloWorldJob(Step callableStep2, Step methodInvokingStep3){
+    public Job HelloWorldJob(Step callableStep2
+                           , Step methodInvokingStep3
+                           , Step systemCmdStep4
+                           , Step systemCmdStep5){
         return jobBuilderFactory.get("HelloWorldJob")
                 .incrementer(new RunIdIncrementer())
                 .start(Step1())
                 .next(callableStep2)
                 .next(methodInvokingStep3)
+                .next(systemCmdStep5) //지우고
+                .next(systemCmdStep4) //생성하고
                 .build();
     }
 
@@ -95,6 +99,7 @@ public class HelloWorldJobConfig {
 
     /*
         다른 클래스 내의 메서드를 Tasklet에서 실행
+        파라미터 없는 경우
      */
     @Bean
     public MethodInvokingTaskletAdapter methodInvokingTasklet(){
@@ -106,7 +111,11 @@ public class HelloWorldJobConfig {
         return methodInvokingTaskletAdapter;
     }
 
-
+    /*
+        파라미터 있는 경우
+        //jobParameters, 사용시 @StepScope를 함께 사용해준다.
+        //--spring.batch.job.names=HelloWorldJob -msg=msg
+     */
     @StepScope
     @Bean
     public MethodInvokingTaskletAdapter methodInvokingTasklet1(@Value("#{jobParameters['msg']}") String msg){
@@ -114,7 +123,7 @@ public class HelloWorldJobConfig {
 
         methodInvokingTaskletAdapter.setTargetObject(service());
         methodInvokingTaskletAdapter.setTargetMethod("serviceMethod");
-        methodInvokingTaskletAdapter.setArguments(new String[]{msg});
+        methodInvokingTaskletAdapter.setArguments(new String[]{msg}); // 파라미터 있을 경우,
 
         return methodInvokingTaskletAdapter;
     }
@@ -122,6 +131,71 @@ public class HelloWorldJobConfig {
     @Bean
     public InvokMethodTest service(){
         return new InvokMethodTest();
+    }
+
+    @Bean
+    public Step systemCmdStep4(Tasklet systemCmdTasklet){
+        return stepBuilderFactory.get("systemCmdStep4")
+                .tasklet(systemCmdTasklet)
+                .build();
+    }
+
+    /*
+        SystemCommand를 실행시키는 Tasklet
+     */
+    @Bean
+    public SystemCommandTasklet systemCmdTasklet(){
+        SystemCommandTasklet sysCmdTasklet = new SystemCommandTasklet();
+
+//        sysCmdTasklet.setWorkingDirectory("~/Desktop");
+        sysCmdTasklet.setWorkingDirectory("/Users/kmy/Desktop"); //경로
+        sysCmdTasklet.setSystemProcessExitCodeMapper(touchCodeMapper());
+        sysCmdTasklet.setTerminationCheckInterval(5000);
+
+        sysCmdTasklet.setTaskExecutor(new SimpleAsyncTaskExecutor());
+//        sysCmdTasklet.setEnvironmentParams(new String[]{
+//                "JAVA_HOME=/java",
+//                "BATCH_HOME=/User/kmy"
+//        });
+        sysCmdTasklet.setCommand("touch test.txt"); // 명령어
+        sysCmdTasklet.setTimeout(5000);
+        sysCmdTasklet.setInterruptOnCancel(true);
+
+        return sysCmdTasklet;
+    }
+
+    @Bean
+    public SimpleSystemProcessExitCodeMapper touchCodeMapper(){
+        return new SimpleSystemProcessExitCodeMapper();
+    }
+
+    @Bean
+    public Step systemCmdStep5(Tasklet systemCmdTasklet1){
+        return stepBuilderFactory.get("systemCmdStep5")
+                .tasklet(systemCmdTasklet1)
+                .build();
+    }
+
+    @Bean
+    public SystemCommandTasklet systemCmdTasklet1(){
+        SystemCommandTasklet sysCmdTasklet = new SystemCommandTasklet();
+
+//        sysCmdTasklet.setWorkingDirectory("~/Desktop");
+        sysCmdTasklet.setWorkingDirectory("/Users/kmy/Desktop"); //경로
+        sysCmdTasklet.setSystemProcessExitCodeMapper(touchCodeMapper());
+        sysCmdTasklet.setTerminationCheckInterval(5000);
+
+        sysCmdTasklet.setTaskExecutor(new SimpleAsyncTaskExecutor());
+//        sysCmdTasklet.setEnvironmentParams(new String[]{
+//                "JAVA_HOME=/java",
+//                "BATCH_HOME=/User/kmy"
+//        });
+
+        sysCmdTasklet.setCommand("rm -rf test.txt"); // 명령어
+        sysCmdTasklet.setTimeout(5000);
+        sysCmdTasklet.setInterruptOnCancel(true);
+
+        return sysCmdTasklet;
     }
 
 }
